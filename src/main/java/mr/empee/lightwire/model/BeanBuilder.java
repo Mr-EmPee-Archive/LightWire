@@ -138,7 +138,7 @@ public class BeanBuilder {
       injectInstanceFields(instance);
       return new BeanProvider() {
         @Override
-        public Object get() {
+        public Object build() {
           return instance;
         }
       };

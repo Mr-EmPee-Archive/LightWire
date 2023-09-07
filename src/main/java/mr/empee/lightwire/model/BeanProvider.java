@@ -9,5 +9,9 @@ public abstract class BeanProvider {
     return get().getClass();
   }
 
-  public abstract Object get();
+  protected abstract Object build();
+
+  public final Object get() {
+    return build();
+  }
 }

@@ -30,7 +30,7 @@ public class Lightwire {
   public <T> void addBean(T bean) {
     beanContext.addProvider(new BeanProvider() {
       @Override
-      public Object get() {
+      public Object build() {
         return bean;
       }
     });

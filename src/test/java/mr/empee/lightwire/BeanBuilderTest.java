@@ -60,7 +60,7 @@ class BeanBuilderTest extends AbstractTest {
     public static BeanProvider buildInstance(NoDepsBean noDepsBean) {
       return new BeanProvider() {
         @Override
-        public ConstructorDepsBean get() {
+        public ConstructorDepsBean build() {
           return new ConstructorDepsBean(noDepsBean, noDepsBean);
         }
       };
