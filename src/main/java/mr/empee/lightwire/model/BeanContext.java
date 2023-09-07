@@ -12,21 +12,20 @@ import java.util.Map;
 
 public class BeanContext {
 
-  private final Map<Class<?>, Object> beans = new HashMap<>();
+  private final Map<Class<?>, BeanProvider> beans = new HashMap<>();
 
   public <T> T getBean(Class<T> clazz) {
-    var bean = beans.get(clazz);
-    if (bean == null) {
-      var provider = buildBean(clazz);
-      bean = provider.get();
-      addBean(bean);
+    var provider = beans.get(clazz);
+    if (provider == null) {
+      provider = buildBean(clazz);
+      addProvider(provider);
     }
 
-    return (T) bean;
+    return (T) provider.get();
   }
 
-  public void addBean(Object bean) {
-    beans.put(bean.getClass(), bean);
+  public void addProvider(BeanProvider bean) {
+    beans.put(bean.getType(), bean);
   }
 
   public boolean isLoaded(Class<?> clazz) {

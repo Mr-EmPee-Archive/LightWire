@@ -2,6 +2,7 @@ package mr.empee.lightwire;
 
 import mr.empee.lightwire.model.BeanContext;
 import mr.empee.lightwire.model.BeanLoader;
+import mr.empee.lightwire.model.BeanProvider;
 
 /**
  * Main class of the library
@@ -16,7 +17,7 @@ public class Lightwire {
   }
 
   private Lightwire(Package scanPackage, Package... exclusions) {
-    beanContext.addBean(this);
+    addBean(this);
 
     BeanLoader beanLoader = new BeanLoader(scanPackage, exclusions);
     beanLoader.load(beanContext);
@@ -24,6 +25,15 @@ public class Lightwire {
 
   public <T> T getBean(Class<T> clazz) {
     return beanContext.getBean(clazz);
+  }
+
+  public <T> void addBean(T bean) {
+    beanContext.addProvider(new BeanProvider() {
+      @Override
+      public Object get() {
+        return bean;
+      }
+    });
   }
 
 }

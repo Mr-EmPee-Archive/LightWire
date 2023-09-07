@@ -5,5 +5,9 @@ package mr.empee.lightwire.model;
  */
 
 public abstract class BeanProvider {
+  public Class<?> getType() {
+    return get().getClass();
+  }
+
   public abstract Object get();
 }
