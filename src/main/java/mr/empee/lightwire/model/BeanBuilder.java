@@ -80,15 +80,11 @@ public class BeanBuilder {
       return new BeanConstructor(method, null);
     }
 
-    if (Modifier.isAbstract(clazz.getModifiers())) {
-      throw new IllegalStateException("The bean " + clazz.getName() + " is abstract use a provider static method!");
-    }
-
     return new BeanConstructor(null, findBeanConstructor(clazz));
   }
 
   private static boolean isBean(Class<?> clazz) {
-    return clazz.isAnnotationPresent(Bean.class) && !clazz.isInterface();
+    return clazz.isAnnotationPresent(Bean.class) && !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers());
   }
 
   public List<? extends Class<?>> getDependencies() {

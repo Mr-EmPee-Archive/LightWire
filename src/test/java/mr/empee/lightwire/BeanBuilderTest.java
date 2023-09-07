@@ -44,7 +44,7 @@ class BeanBuilderTest extends AbstractTest {
   }
 
   @Bean
-  public static abstract class MethodDepsBean {
+  public static class MethodDepsBean {
     @Provider
     public static BeanProvider buildInstance(NoDepsBean noDepsBean) {
       return new BeanProvider() {
