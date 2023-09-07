@@ -1,10 +1,11 @@
 plugins {
-    id("java")
     id("io.freefair.lombok") version "8.3"
+    id("maven-publish")
+    id("java")
 }
 
-group = "mr.empee.lightwire"
-version = "1.0-SNAPSHOT"
+group = "mr.empee"
+version = System.getenv("CI_COMMIT_TAG") ?: "develop"
 
 repositories {
     mavenCentral()
@@ -18,4 +19,27 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("library") {
+            from(components["java"])
+        }
+    }
+
+    repositories {
+        maven {
+            var projectId = System.getenv("CI_PROJECT_ID")
+            url = uri("https://gitlab.com/api/v4/projects/$projectId/packages/maven")
+            credentials(HttpHeaderCredentials::class) {
+                name = "Job-Token"
+                value = System.getenv("CI_JOB_TOKEN")
+            }
+
+            authentication {
+                create("header", HttpHeaderAuthentication::class)
+            }
+        }
+    }
 }
