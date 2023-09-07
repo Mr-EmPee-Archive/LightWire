@@ -1,8 +1,10 @@
 package mr.empee.lightwire;
 
 import lombok.RequiredArgsConstructor;
-import mr.empee.lightwire.annotations.Bean;
+import mr.empee.lightwire.annotations.Factory;
+import mr.empee.lightwire.annotations.Instance;
 import mr.empee.lightwire.annotations.Provider;
+import mr.empee.lightwire.annotations.Singleton;
 import mr.empee.lightwire.model.BeanBuilder;
 import mr.empee.lightwire.model.BeanContext;
 import mr.empee.lightwire.model.BeanProvider;
@@ -32,18 +34,27 @@ class BeanBuilderTest extends AbstractTest {
     assertNotNull(new BeanBuilder(MethodDepsBean.class).build(new BeanContext()));
   }
 
-  @Bean
+  @Test
+  @DisplayName("Inject singleton instance")
+  void injectSingletonInstance() throws InvocationTargetException {
+    var provider = new BeanBuilder(InjectSingletonBean.class).build(new BeanContext());
+    provider.get();
+
+    assertNotNull(InjectSingletonBean.instance);
+  }
+
+  @Singleton
   public static class NoDepsBean {
   }
 
-  @Bean
+  @Singleton
   @RequiredArgsConstructor
   public static class ConstructorDepsBean {
     private final NoDepsBean noDepsBean;
     private final NoDepsBean noDepsBean2;
   }
 
-  @Bean
+  @Factory
   public static class MethodDepsBean {
     @Provider
     public static BeanProvider buildInstance(NoDepsBean noDepsBean) {
@@ -54,6 +65,12 @@ class BeanBuilderTest extends AbstractTest {
         }
       };
     }
+  }
+
+  @Singleton
+  public static class InjectSingletonBean {
+    @Instance
+    private static InjectSingletonBean instance;
   }
 
 }

@@ -1,7 +1,7 @@
 package scannablePackage.exclusion2;
 
-import mr.empee.lightwire.annotations.Bean;
+import mr.empee.lightwire.annotations.Singleton;
 
-@Bean
+@Singleton
 public class EagerBean4 {
 }

@@ -2,8 +2,9 @@ package mr.empee.lightwire.model;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import mr.empee.lightwire.annotations.Bean;
+import mr.empee.lightwire.annotations.Factory;
 import mr.empee.lightwire.annotations.Lazy;
+import mr.empee.lightwire.annotations.Singleton;
 import mr.empee.lightwire.exceptions.LightwireException;
 import mr.empee.lightwire.utils.ReflectionUtils;
 import org.apache.bcel.classfile.AnnotationEntry;
@@ -41,7 +42,7 @@ public class BeanLoader {
         .map(this::parseClass)
         .filter(JavaClass::isClass)
         .filter(c -> Arrays.stream(exclusions).noneMatch(p -> p.getName().equals(c.getPackageName())))
-        .filter(c -> hasAnnotation(c, Bean.class))
+        .filter(c -> hasAnnotation(c, Singleton.class) || hasAnnotation(c, Factory.class))
         .filter(c -> !hasAnnotation(c, Lazy.class))
         .map(c -> loadClass(c.getClassName()))
         .toList();

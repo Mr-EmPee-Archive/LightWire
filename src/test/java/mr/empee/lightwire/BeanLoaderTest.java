@@ -1,7 +1,7 @@
 package mr.empee.lightwire;
 
 import lombok.RequiredArgsConstructor;
-import mr.empee.lightwire.annotations.Bean;
+import mr.empee.lightwire.annotations.Singleton;
 import mr.empee.lightwire.exceptions.LightwireException;
 import mr.empee.lightwire.model.BeanContext;
 import mr.empee.lightwire.model.BeanLoader;
@@ -47,7 +47,7 @@ class BeanLoaderTest extends AbstractTest {
     assertFalse(context.isLoaded(EagerBean4.class));
   }
 
-  @Bean
+  @Singleton
   @RequiredArgsConstructor
   public static class CircularDepBean {
     private final CircularDepBean dep;

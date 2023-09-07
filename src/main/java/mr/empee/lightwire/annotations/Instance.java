@@ -6,10 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark a class as a bean, so that it can be injected
+ * Mark a static field with this annotation to inject the instance of the singleton.
  */
 
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Bean {
+public @interface Instance {
 }

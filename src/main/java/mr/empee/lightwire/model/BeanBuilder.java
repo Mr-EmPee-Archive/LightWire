@@ -2,8 +2,10 @@ package mr.empee.lightwire.model;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import mr.empee.lightwire.annotations.Bean;
+import mr.empee.lightwire.annotations.Factory;
+import mr.empee.lightwire.annotations.Instance;
 import mr.empee.lightwire.annotations.Provider;
+import mr.empee.lightwire.annotations.Singleton;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -29,7 +31,11 @@ public class BeanBuilder {
     }
 
     this.beanClass = beanClass;
-    this.constructor = getBeanConstructor(beanClass);
+    if (beanClass.isAnnotationPresent(Factory.class)) {
+      this.constructor = new BeanConstructor(findBeanConstructionMethod(beanClass), null);
+    } else {
+      this.constructor = new BeanConstructor(null, findBeanConstructor(beanClass));
+    }
   }
 
   private static Method findBeanConstructionMethod(Class<?> clazz) {
@@ -38,7 +44,7 @@ public class BeanBuilder {
         .toList();
 
     if (methods.isEmpty()) {
-      return null;
+      throw new IllegalStateException("Unable to find a provider for the bean " + clazz.getName());
     }
 
     if (methods.size() > 1) {
@@ -47,11 +53,11 @@ public class BeanBuilder {
 
     var method = methods.get(0);
     if (!Modifier.isStatic(method.getModifiers())) {
-      throw new IllegalStateException("The method for the bean " + clazz.getName() + " isn't static");
+      throw new IllegalStateException("The provider of the bean " + clazz.getName() + " isn't static");
     }
 
     if (!method.getReturnType().equals(BeanProvider.class)) {
-      throw new IllegalStateException("The provider for the bean " + clazz.getName() + " must return a bean provider");
+      throw new IllegalStateException("The provider for the bean " + clazz.getName() + " must return a BeanProvider");
     }
 
     return method;
@@ -74,17 +80,22 @@ public class BeanBuilder {
     return injectableConstructors.get(0);
   }
 
-  private static BeanConstructor getBeanConstructor(Class<?> clazz) {
-    var method = findBeanConstructionMethod(clazz);
-    if (method != null) {
-      return new BeanConstructor(method, null);
-    }
+  @SneakyThrows
+  private static void injectInstanceFields(Object target) {
+    var fields = Arrays.stream(target.getClass().getDeclaredFields())
+        .filter(f -> f.isAnnotationPresent(Instance.class))
+        .filter(f -> Modifier.isStatic(f.getModifiers()))
+        .toList();
 
-    return new BeanConstructor(null, findBeanConstructor(clazz));
+    for (var field : fields) {
+      field.setAccessible(true);
+      field.set(null, target);
+    }
   }
 
   private static boolean isBean(Class<?> clazz) {
-    return clazz.isAnnotationPresent(Bean.class) && !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers());
+    return (clazz.isAnnotationPresent(Singleton.class) || clazz.isAnnotationPresent(Factory.class))
+        && !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers());
   }
 
   public List<? extends Class<?>> getDependencies() {
@@ -124,6 +135,7 @@ public class BeanBuilder {
 
       constructor.setAccessible(true);
       var instance = constructor.newInstance(args);
+      injectInstanceFields(instance);
       return new BeanProvider() {
         @Override
         public Object get() {
