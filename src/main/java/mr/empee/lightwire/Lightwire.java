@@ -12,13 +12,17 @@ public class Lightwire {
 
   private final BeanContext beanContext = new BeanContext();
 
-  public static Lightwire inject(Package scanPackage, Package... exclusions) {
-    return new Lightwire(scanPackage, exclusions);
+  public static Lightwire create(Package scanPackage, Package... exclusions) {
+    var instance = new Lightwire();
+    instance.loadBeans(scanPackage, exclusions);
+    return instance;
   }
 
-  private Lightwire(Package scanPackage, Package... exclusions) {
+  private Lightwire() {
     addBean(this);
+  }
 
+  public void loadBeans(Package scanPackage, Package... exclusions) {
     BeanLoader beanLoader = new BeanLoader(scanPackage, exclusions);
     beanLoader.load(beanContext);
   }
