@@ -18,7 +18,7 @@ public class Lightwire {
     return instance;
   }
 
-  private Lightwire() {
+  public Lightwire() {
     addBean(this);
   }
 
