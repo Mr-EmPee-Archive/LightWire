@@ -89,6 +89,10 @@ public class BeanLoader {
     checkForCircularDependency();
     for (BeanBuilder<?> builder : beans.values()) {
       try {
+        if (context.isLoaded(builder.getBeanClass())) {
+          continue;
+        }
+
         context.addProvider(builder.build(context));
       } catch (InvocationTargetException e) {
         throw new LightwireException("Failed to build bean " + builder.getBeanClass().getName(), e.getCause());

@@ -5,6 +5,7 @@ import mr.empee.lightwire.annotations.Singleton;
 import mr.empee.lightwire.exceptions.LightwireException;
 import mr.empee.lightwire.model.BeanContext;
 import mr.empee.lightwire.model.BeanLoader;
+import mr.empee.lightwire.model.BeanProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import scannablePackage.EagerBean1;
@@ -30,6 +31,13 @@ class BeanLoaderTest extends AbstractTest {
     var targetPackage = EagerBean1.class.getPackage();
 
     BeanContext context = new BeanContext();
+    context.addProvider(new BeanProvider<>(Integer.class) {
+      @Override
+      protected Integer build() {
+        return 10;
+      }
+    });
+
     BeanLoader loader = new BeanLoader(targetPackage, context);
     loader.load();
 
