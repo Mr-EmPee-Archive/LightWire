@@ -10,10 +10,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * BeanLoader is responsible for loading beans
@@ -58,19 +56,15 @@ public class BeanLoader {
 
   private void checkForCircularDependency() {
     for (BeanBuilder<?> builder : beans.values()) {
-      checkForCircularDependency(null, builder, new HashSet<>());
+      checkForCircularDependency(null, builder);
     }
   }
 
-  private void checkForCircularDependency(BeanBuilder parent, BeanBuilder bean, Set<Class<?>> visitedBeans) {
-    boolean isNewDependency = visitedBeans.add(bean.getBeanClass());
-    if (!isNewDependency) {
-      throw new LightwireException("""
-          Circular dependency detected!
-            Bean already needed: %s
-            Bean that needs it: %s
-          """.formatted(bean.getBeanClass().getName(), parent.getBeanClass().getName())
-      );
+  private void checkForCircularDependency(BeanBuilder<?> start, BeanBuilder<?> bean) {
+    if (start == null) {
+      start = bean;
+    } else if (start.getBeanClass() == bean.getBeanClass()) {
+      throw new LightwireException("Circular dependency detected for bean " + start.getBeanClass());
     }
 
     for (Class<?> dependency : bean.getDependencies()) {
@@ -84,7 +78,7 @@ public class BeanLoader {
         builder = new BeanBuilder<>(dependency);
       }
 
-      checkForCircularDependency(bean, builder, visitedBeans);
+      checkForCircularDependency(start, builder);
     }
   }
 
