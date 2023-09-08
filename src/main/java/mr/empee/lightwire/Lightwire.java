@@ -25,8 +25,8 @@ public class Lightwire {
   }
 
   public void loadBeans(Package scanPackage) {
-    BeanLoader beanLoader = new BeanLoader(scanPackage);
-    beanLoader.load(beanContext);
+    BeanLoader beanLoader = new BeanLoader(scanPackage, beanContext);
+    beanLoader.load();
   }
 
   public <T> T getBean(Class<T> clazz) {

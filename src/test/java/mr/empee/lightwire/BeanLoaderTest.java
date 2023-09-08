@@ -10,18 +10,18 @@ import org.junit.jupiter.api.Test;
 import scannablePackage.EagerBean1;
 import scannablePackage.EagerBean2;
 
+import java.util.List;
+
 @DisplayName("Load default beans")
 class BeanLoaderTest extends AbstractTest {
 
   @Test
   @DisplayName("Report circular dependencies")
   void throwsOnCircularDep() {
-    var loader = new BeanLoader(CircularDepBean.class);
     var context = new BeanContext();
+    var loader = new BeanLoader(context, List.of(CircularDepBean.class));
 
-    assertThrows(LightwireException.class, () -> {
-      loader.load(context);
-    });
+    assertThrows(LightwireException.class, loader::load);
   }
 
   @Test
@@ -30,8 +30,8 @@ class BeanLoaderTest extends AbstractTest {
     var targetPackage = EagerBean1.class.getPackage();
 
     BeanContext context = new BeanContext();
-    BeanLoader loader = new BeanLoader(targetPackage);
-    loader.load(context);
+    BeanLoader loader = new BeanLoader(targetPackage, context);
+    loader.load();
 
     assertTrue(context.isLoaded(EagerBean1.class));
     assertTrue(context.isLoaded(EagerBean2.class));

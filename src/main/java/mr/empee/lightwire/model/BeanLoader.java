@@ -8,6 +8,7 @@ import mr.empee.lightwire.exceptions.LightwireException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,15 +22,14 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class BeanLoader {
 
+  private final BeanContext context;
   private final Map<Class<?>, BeanBuilder<?>> beans = new HashMap<>();
 
-  public BeanLoader(Package scanPackage) {
-    for (var c : findBeanClasses(scanPackage)) {
-      beans.put(c, new BeanBuilder<>(c));
-    }
+  public BeanLoader(Package scanPackage, BeanContext context) {
+    this(context, findBeanClasses(scanPackage));
   }
 
-  private List<Class<?>> findBeanClasses(Package scanPackage) {
+  private static List<Class<?>> findBeanClasses(Package scanPackage) {
     var beanClasses = new ArrayList<Class<?>>();
     ClassGraph classGraph = new ClassGraph()
         .enableAnnotationInfo()
@@ -48,14 +48,16 @@ public class BeanLoader {
     return beanClasses;
   }
 
-  public BeanLoader(Class<?>... classes) {
+  public BeanLoader(BeanContext context, Collection<Class<?>> classes) {
+    this.context = context;
+
     for (Class<?> c : classes) {
       beans.put(c, new BeanBuilder<>(c));
     }
   }
 
   private void checkForCircularDependency() {
-    for (BeanBuilder builder : beans.values()) {
+    for (BeanBuilder<?> builder : beans.values()) {
       checkForCircularDependency(null, builder, new HashSet<>());
     }
   }
@@ -74,6 +76,10 @@ public class BeanLoader {
     for (Class<?> dependency : bean.getDependencies()) {
       var builder = beans.get(dependency);
       if (builder == null) {
+        if (context.isLoaded(dependency)) {
+          continue;
+        }
+
         //Null if it is a lazy load dep
         builder = new BeanBuilder<>(dependency);
       }
@@ -85,11 +91,11 @@ public class BeanLoader {
   /**
    * Loads all targeted beans
    */
-  public void load(BeanContext beanContext) {
+  public void load() {
     checkForCircularDependency();
     for (BeanBuilder<?> builder : beans.values()) {
       try {
-        beanContext.addProvider(builder.build(beanContext));
+        context.addProvider(builder.build(context));
       } catch (InvocationTargetException e) {
         throw new LightwireException("Failed to build bean " + builder.getBeanClass().getName(), e.getCause());
       }
