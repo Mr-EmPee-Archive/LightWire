@@ -1,8 +1,7 @@
 package scannablePackage;
 
-import mr.empee.lightwire.annotations.Lazy;
 import mr.empee.lightwire.annotations.Singleton;
 
-@Singleton @Lazy
+@Singleton(lazy = true)
 public class LazyBean1 {
 }

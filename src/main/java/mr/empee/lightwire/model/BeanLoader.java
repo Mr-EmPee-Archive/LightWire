@@ -1,20 +1,21 @@
 package mr.empee.lightwire.model;
 
+import io.github.classgraph.AnnotationInfo;
+import io.github.classgraph.AnnotationParameterValue;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import mr.empee.lightwire.annotations.Factory;
-import mr.empee.lightwire.annotations.Lazy;
 import mr.empee.lightwire.annotations.Singleton;
 import mr.empee.lightwire.exceptions.LightwireException;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * BeanLoader is responsible for loading beans
@@ -25,46 +26,45 @@ public class BeanLoader {
 
   private final Map<Class<?>, BeanBuilder<?>> beans = new HashMap<>();
 
-  public BeanLoader(Package scanPackage, ClassLoader classLoader) {
-    for (var c : findAllClasses(scanPackage.getName(), classLoader)) {
-      var isBean = c.isAnnotationPresent(Singleton.class) || c.isAnnotationPresent(Factory.class);
-      if (c.isAnnotationPresent(Lazy.class) || !isBean) {
-        continue;
-      }
-
+  public BeanLoader(Package scanPackage) {
+    for (var c : findBeanClasses(scanPackage)) {
       beans.put(c, new BeanBuilder<>(c));
     }
+  }
+
+  private List<Class<?>> findBeanClasses(Package scanPackage) {
+    var beanClasses = new ArrayList<Class<?>>();
+
+    ClassGraph classGraph = new ClassGraph()
+        .enableAnnotationInfo()
+        .acceptPackages(scanPackage.getName());
+
+    try (var scanResult = classGraph.scan()) {
+      var foundClasses = new ArrayList<ClassInfo>();
+      foundClasses.addAll(scanResult.getClassesWithAnnotation(Factory.class));
+      foundClasses.addAll(scanResult.getClassesWithAnnotation(Singleton.class));
+
+      for (ClassInfo routeClassInfo : foundClasses) {
+        AnnotationInfo routeAnnotationInfo = routeClassInfo.getAnnotationInfo(Factory.class);
+        if (routeAnnotationInfo == null) {
+          routeAnnotationInfo = routeClassInfo.getAnnotationInfo(Singleton.class);
+        }
+
+        List<AnnotationParameterValue> routeParamVals = routeAnnotationInfo.getParameterValues();
+        boolean isLazy = (boolean) routeParamVals.get(0).getValue();
+        if (!isLazy) {
+          beanClasses.add(routeClassInfo.loadClass());
+        }
+      }
+    }
+
+    return beanClasses;
   }
 
   public BeanLoader(Class<?>... classes) {
     for (Class<?> c : classes) {
       beans.put(c, new BeanBuilder<>(c));
     }
-  }
-
-  @SneakyThrows
-  private Set<Class<?>> findAllClasses(String packageName, ClassLoader classLoader) {
-    var path = packageName.replaceAll("[.]", "/");
-
-    try (
-        var stream = classLoader.getResourceAsStream(path)
-    ) {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-      return reader.lines()
-          .filter(line -> line.endsWith(".class"))
-          .map(line -> getClass(line, packageName))
-          .collect(Collectors.toSet());
-    }
-  }
-
-  @SneakyThrows
-  private Class<?> getClass(String className, String packageName) {
-    return Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.')));
-  }
-
-  @SneakyThrows
-  private Class<?> loadClass(String clazz) {
-    return Class.forName(clazz);
   }
 
   private void checkForCircularDependency() {

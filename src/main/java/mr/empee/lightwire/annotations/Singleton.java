@@ -20,4 +20,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Singleton {
+
+  /**
+   * If true the class will be loaded only when it is requested
+   */
+  boolean lazy() default false;
+
 }
