@@ -13,19 +13,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Builds a bean instance from a class
  */
 
-public class BeanBuilder {
+public class BeanBuilder<T> {
 
   @Getter
-  private final Class<?> beanClass;
+  private final Class<T> beanClass;
   private final BeanConstructor constructor;
 
-  public BeanBuilder(Class<?> beanClass) {
+  public BeanBuilder(Class<T> beanClass) {
     if (!isBean(beanClass)) {
       throw new IllegalArgumentException("The class " + beanClass.getName() + " isn't a buildable bean");
     }
@@ -98,20 +97,20 @@ public class BeanBuilder {
         && !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers());
   }
 
-  public List<? extends Class<?>> getDependencies() {
+  public Class<?>[] getDependencies() {
     return Arrays.stream(constructor.getDependencies())
         .map(Parameter::getType)
-        .toList();
+        .toArray(Class[]::new);
   }
 
   /**
    * Builds a bean instance from a class
    */
-  public BeanProvider build(BeanContext context) throws InvocationTargetException {
+  public BeanProvider<T> build(BeanContext context) throws InvocationTargetException {
     Parameter[] dependencies = constructor.getDependencies();
     Object[] args = new Object[dependencies.length];
     for (int i = 0; i < dependencies.length; i++) {
-      args[i] = context.getBean(dependencies[i].getType());
+      args[i] = context.getProvider(dependencies[i].getType());
     }
 
     return constructor.build(args);
@@ -136,7 +135,7 @@ public class BeanBuilder {
       constructor.setAccessible(true);
       var instance = constructor.newInstance(args);
       injectInstanceFields(instance);
-      return new BeanProvider() {
+      return new BeanProvider(instance.getClass()) {
         @Override
         public Object build() {
           return instance;

@@ -4,6 +4,8 @@ import mr.empee.lightwire.model.BeanContext;
 import mr.empee.lightwire.model.BeanLoader;
 import mr.empee.lightwire.model.BeanProvider;
 
+import java.util.List;
+
 /**
  * Main class of the library
  */
@@ -28,11 +30,17 @@ public class Lightwire {
   }
 
   public <T> T getBean(Class<T> clazz) {
-    return beanContext.getBean(clazz);
+    return beanContext.getProvider(clazz).get();
+  }
+
+  public <T> List<T> getAllBeans(Class<T> clazz) {
+    return beanContext.getAllProviders(clazz).stream()
+        .map(BeanProvider::get)
+        .toList();
   }
 
   public <T> void addBean(T bean) {
-    beanContext.addProvider(new BeanProvider() {
+    beanContext.addProvider(new BeanProvider(bean.getClass()) {
       @Override
       public Object build() {
         return bean;

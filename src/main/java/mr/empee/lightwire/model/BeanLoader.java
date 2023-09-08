@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BeanLoader {
 
-  private final Map<Class<?>, BeanBuilder> beans = new HashMap<>();
+  private final Map<Class<?>, BeanBuilder<?>> beans = new HashMap<>();
 
   public BeanLoader(Package scanPackage) {
     for (var c : findAllClassesUsingClassLoader(scanPackage.getName())) {
@@ -32,13 +32,13 @@ public class BeanLoader {
         continue;
       }
 
-      beans.put(c, new BeanBuilder(c));
+      beans.put(c, new BeanBuilder<>(c));
     }
   }
 
   public BeanLoader(Class<?>... classes) {
     for (Class<?> c : classes) {
-      beans.put(c, new BeanBuilder(c));
+      beans.put(c, new BeanBuilder<>(c));
     }
   }
 
@@ -88,7 +88,7 @@ public class BeanLoader {
       var builder = beans.get(dependency);
       if (builder == null) {
         //Null if it is a lazy load dep
-        builder = new BeanBuilder(dependency);
+        builder = new BeanBuilder<>(dependency);
       }
 
       checkForCircularDependency(bean, builder, visitedBeans);
@@ -100,7 +100,7 @@ public class BeanLoader {
    */
   public void load(BeanContext beanContext) {
     checkForCircularDependency();
-    for (BeanBuilder builder : beans.values()) {
+    for (BeanBuilder<?> builder : beans.values()) {
       try {
         beanContext.addProvider(builder.build(beanContext));
       } catch (InvocationTargetException e) {

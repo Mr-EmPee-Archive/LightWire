@@ -1,17 +1,21 @@
 package mr.empee.lightwire.model;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 /**
  * A bean wrapper
  */
 
-public abstract class BeanProvider {
-  public Class<?> getType() {
-    return get().getClass();
-  }
+@RequiredArgsConstructor
+public abstract class BeanProvider<T> {
 
-  protected abstract Object build();
+  @Getter
+  private final Class<T> type;
 
-  public final Object get() {
+  protected abstract T build();
+
+  public final T get() {
     return build();
   }
 }

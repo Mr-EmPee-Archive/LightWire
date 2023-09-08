@@ -57,8 +57,8 @@ class BeanBuilderTest extends AbstractTest {
   @Factory
   public static class MethodDepsBean {
     @Provider
-    public static BeanProvider buildInstance(NoDepsBean noDepsBean) {
-      return new BeanProvider() {
+    public static BeanProvider<ConstructorDepsBean> buildInstance(NoDepsBean noDepsBean) {
+      return new BeanProvider<>(ConstructorDepsBean.class) {
         @Override
         public ConstructorDepsBean build() {
           return new ConstructorDepsBean(noDepsBean, noDepsBean);
