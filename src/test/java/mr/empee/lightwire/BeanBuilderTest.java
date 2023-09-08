@@ -31,13 +31,13 @@ class BeanBuilderTest extends AbstractTest {
   @Test
   @DisplayName("Inject dependencies using provider method")
   void injectDepsUsingMethod() throws InvocationTargetException {
-    assertNotNull(new BeanBuilder(MethodDepsBean.class).build(new BeanContext()));
+    assertNotNull(new BeanBuilder<>(MethodDepsBean.class).build(new BeanContext()));
   }
 
   @Test
   @DisplayName("Inject singleton instance")
   void injectSingletonInstance() throws InvocationTargetException {
-    var provider = new BeanBuilder(InjectSingletonBean.class).build(new BeanContext());
+    var provider = new BeanBuilder<>(InjectSingletonBean.class).build(new BeanContext());
     provider.get();
 
     assertNotNull(InjectSingletonBean.instance);

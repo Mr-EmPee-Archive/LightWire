@@ -110,7 +110,7 @@ public class BeanBuilder<T> {
     Parameter[] dependencies = constructor.getDependencies();
     Object[] args = new Object[dependencies.length];
     for (int i = 0; i < dependencies.length; i++) {
-      args[i] = context.getProvider(dependencies[i].getType());
+      args[i] = context.getProvider(dependencies[i].getType()).get();
     }
 
     return constructor.build(args);
