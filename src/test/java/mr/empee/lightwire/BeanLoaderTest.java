@@ -30,7 +30,7 @@ class BeanLoaderTest extends AbstractTest {
     var targetPackage = EagerBean1.class.getPackage();
 
     BeanContext context = new BeanContext();
-    BeanLoader loader = new BeanLoader(targetPackage);
+    BeanLoader loader = new BeanLoader(targetPackage, getClass().getClassLoader());
     loader.load(context);
 
     assertTrue(context.isLoaded(EagerBean1.class));

@@ -25,8 +25,8 @@ public class BeanLoader {
 
   private final Map<Class<?>, BeanBuilder<?>> beans = new HashMap<>();
 
-  public BeanLoader(Package scanPackage) {
-    for (var c : findAllClassesUsingClassLoader(scanPackage.getName())) {
+  public BeanLoader(Package scanPackage, ClassLoader classLoader) {
+    for (var c : findAllClasses(scanPackage.getName(), classLoader)) {
       var isBean = c.isAnnotationPresent(Singleton.class) || c.isAnnotationPresent(Factory.class);
       if (c.isAnnotationPresent(Lazy.class) || !isBean) {
         continue;
@@ -43,11 +43,11 @@ public class BeanLoader {
   }
 
   @SneakyThrows
-  private Set<Class<?>> findAllClassesUsingClassLoader(String packageName) {
+  private Set<Class<?>> findAllClasses(String packageName, ClassLoader classLoader) {
     var path = packageName.replaceAll("[.]", "/");
 
     try (
-        var stream = ClassLoader.getSystemClassLoader().getResourceAsStream(path)
+        var stream = classLoader.getResourceAsStream(path)
     ) {
       BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
       return reader.lines()
