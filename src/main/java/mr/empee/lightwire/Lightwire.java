@@ -12,9 +12,9 @@ public class Lightwire {
 
   private final BeanContext beanContext = new BeanContext();
 
-  public static Lightwire create(Package scanPackage, Package... exclusions) {
+  public static Lightwire create(Package scanPackage) {
     var instance = new Lightwire();
-    instance.loadBeans(scanPackage, exclusions);
+    instance.loadBeans(scanPackage);
     return instance;
   }
 
@@ -22,8 +22,8 @@ public class Lightwire {
     addBean(this);
   }
 
-  public void loadBeans(Package scanPackage, Package... exclusions) {
-    BeanLoader beanLoader = new BeanLoader(scanPackage, exclusions);
+  public void loadBeans(Package scanPackage) {
+    BeanLoader beanLoader = new BeanLoader(scanPackage);
     beanLoader.load(beanContext);
   }
 

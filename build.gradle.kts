@@ -12,8 +12,6 @@ repositories {
 }
 
 dependencies {
-    implementation("org.apache.bcel:bcel:6.7.0")
-
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 }
 

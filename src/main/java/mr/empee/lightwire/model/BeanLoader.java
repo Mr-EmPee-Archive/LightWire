@@ -6,20 +6,15 @@ import mr.empee.lightwire.annotations.Factory;
 import mr.empee.lightwire.annotations.Lazy;
 import mr.empee.lightwire.annotations.Singleton;
 import mr.empee.lightwire.exceptions.LightwireException;
-import mr.empee.lightwire.utils.ReflectionUtils;
-import org.apache.bcel.classfile.AnnotationEntry;
-import org.apache.bcel.classfile.ClassParser;
-import org.apache.bcel.classfile.JavaClass;
 
-import java.io.File;
-import java.lang.annotation.Annotation;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * BeanLoader is responsible for loading beans
@@ -30,24 +25,13 @@ public class BeanLoader {
 
   private final Map<Class<?>, BeanBuilder> beans = new HashMap<>();
 
-  public BeanLoader(Package scanPackage, Package... exclusions) {
-    this(ReflectionUtils.getClasses(scanPackage), exclusions);
-  }
+  public BeanLoader(Package scanPackage) {
+    for (var c : findAllClassesUsingClassLoader(scanPackage.getName())) {
+      var isBean = c.isAnnotationPresent(Singleton.class) || c.isAnnotationPresent(Factory.class);
+      if (c.isAnnotationPresent(Lazy.class) || !isBean) {
+        continue;
+      }
 
-  /**
-   * Create a bean loader used to load beans from the given collection of classes
-   */
-  public BeanLoader(Collection<File> classes, Package... exclusions) {
-    var target = classes.stream()
-        .map(this::parseClass)
-        .filter(JavaClass::isClass)
-        .filter(c -> Arrays.stream(exclusions).noneMatch(p -> p.getName().equals(c.getPackageName())))
-        .filter(c -> hasAnnotation(c, Singleton.class) || hasAnnotation(c, Factory.class))
-        .filter(c -> !hasAnnotation(c, Lazy.class))
-        .map(c -> loadClass(c.getClassName()))
-        .toList();
-
-    for (Class<?> c : target) {
       beans.put(c, new BeanBuilder(c));
     }
   }
@@ -56,6 +40,31 @@ public class BeanLoader {
     for (Class<?> c : classes) {
       beans.put(c, new BeanBuilder(c));
     }
+  }
+
+  @SneakyThrows
+  private Set<Class<?>> findAllClassesUsingClassLoader(String packageName) {
+    var path = packageName.replaceAll("[.]", "/");
+
+    try (
+        var stream = ClassLoader.getSystemClassLoader().getResourceAsStream(path)
+    ) {
+      BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+      return reader.lines()
+          .filter(line -> line.endsWith(".class"))
+          .map(line -> getClass(line, packageName))
+          .collect(Collectors.toSet());
+    }
+  }
+
+  @SneakyThrows
+  private Class<?> getClass(String className, String packageName) {
+    return Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.')));
+  }
+
+  @SneakyThrows
+  private Class<?> loadClass(String clazz) {
+    return Class.forName(clazz);
   }
 
   private void checkForCircularDependency() {
@@ -99,29 +108,4 @@ public class BeanLoader {
       }
     }
   }
-
-  @SneakyThrows
-  private Class<?> loadClass(String name) {
-    return Class.forName(name);
-  }
-
-  private boolean hasAnnotation(JavaClass clazz, Class<? extends Annotation> annotation) {
-    for (AnnotationEntry a : clazz.getAnnotationEntries()) {
-      var type = a.getAnnotationType()
-          .replace('/', '.')
-          .replace('\\', '.');
-
-      if (type.contains(annotation.getName())) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  @SneakyThrows
-  private JavaClass parseClass(File file) {
-    return new ClassParser(file.getAbsolutePath()).parse();
-  }
-
 }

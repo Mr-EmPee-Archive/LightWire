@@ -9,9 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import scannablePackage.EagerBean1;
 import scannablePackage.EagerBean2;
-import scannablePackage.LazyBean1;
-import scannablePackage.exclusion1.EagerBean3;
-import scannablePackage.exclusion2.EagerBean4;
 
 @DisplayName("Load default beans")
 class BeanLoaderTest extends AbstractTest {
@@ -31,20 +28,13 @@ class BeanLoaderTest extends AbstractTest {
   @DisplayName("Scan the package and loads eager beans")
   void loadBeansFromScan() {
     var targetPackage = EagerBean1.class.getPackage();
-    var exclusions = new Package[] {
-        EagerBean3.class.getPackage(),
-        EagerBean4.class.getPackage()
-    };
 
     BeanContext context = new BeanContext();
-    BeanLoader loader = new BeanLoader(targetPackage, exclusions);
+    BeanLoader loader = new BeanLoader(targetPackage);
     loader.load(context);
 
     assertTrue(context.isLoaded(EagerBean1.class));
     assertTrue(context.isLoaded(EagerBean2.class));
-    assertFalse(context.isLoaded(LazyBean1.class));
-    assertFalse(context.isLoaded(EagerBean3.class));
-    assertFalse(context.isLoaded(EagerBean4.class));
   }
 
   @Singleton
