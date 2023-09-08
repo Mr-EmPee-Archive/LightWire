@@ -1,11 +1,8 @@
 package mr.empee.lightwire.model;
 
-import io.github.classgraph.AnnotationInfo;
-import io.github.classgraph.AnnotationParameterValue;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import lombok.RequiredArgsConstructor;
-import mr.empee.lightwire.annotations.Factory;
 import mr.empee.lightwire.annotations.Singleton;
 import mr.empee.lightwire.exceptions.LightwireException;
 
@@ -34,24 +31,14 @@ public class BeanLoader {
 
   private List<Class<?>> findBeanClasses(Package scanPackage) {
     var beanClasses = new ArrayList<Class<?>>();
-
     ClassGraph classGraph = new ClassGraph()
         .enableAnnotationInfo()
         .acceptPackages(scanPackage.getName());
 
     try (var scanResult = classGraph.scan()) {
-      var foundClasses = new ArrayList<ClassInfo>();
-      foundClasses.addAll(scanResult.getClassesWithAnnotation(Factory.class));
-      foundClasses.addAll(scanResult.getClassesWithAnnotation(Singleton.class));
-
-      for (ClassInfo routeClassInfo : foundClasses) {
-        AnnotationInfo routeAnnotationInfo = routeClassInfo.getAnnotationInfo(Factory.class);
-        if (routeAnnotationInfo == null) {
-          routeAnnotationInfo = routeClassInfo.getAnnotationInfo(Singleton.class);
-        }
-
-        List<AnnotationParameterValue> routeParamVals = routeAnnotationInfo.getParameterValues();
-        boolean isLazy = (boolean) routeParamVals.get(0).getValue();
+      for (ClassInfo routeClassInfo : scanResult.getClassesWithAnnotation(Singleton.class)) {
+        var values = routeClassInfo.getAnnotationInfo(Singleton.class).getParameterValues();
+        boolean isLazy = (boolean) values.get(0).getValue();
         if (!isLazy) {
           beanClasses.add(routeClassInfo.loadClass());
         }

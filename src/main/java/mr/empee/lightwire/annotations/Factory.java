@@ -20,9 +20,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Factory {
 
-  /**
-   * If true the class will be loaded only when it is requested
-   */
-  boolean lazy() default false;
-
 }
