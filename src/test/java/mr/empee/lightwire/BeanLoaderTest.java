@@ -6,10 +6,11 @@ import mr.empee.lightwire.exceptions.LightwireException;
 import mr.empee.lightwire.model.BeanContext;
 import mr.empee.lightwire.model.BeanLoader;
 import mr.empee.lightwire.model.BeanProvider;
+import scannable.EagerBean1;
+import scannable.EagerBean2;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import scannablePackage.EagerBean1;
-import scannablePackage.EagerBean2;
 
 import java.util.List;
 

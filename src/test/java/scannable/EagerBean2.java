@@ -1,4 +1,4 @@
-package scannablePackage;
+package scannable;
 
 import mr.empee.lightwire.annotations.Singleton;
 

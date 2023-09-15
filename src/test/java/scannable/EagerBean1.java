@@ -1,4 +1,4 @@
-package scannablePackage;
+package scannable;
 
 import lombok.RequiredArgsConstructor;
 import mr.empee.lightwire.annotations.Singleton;
@@ -7,5 +7,5 @@ import mr.empee.lightwire.annotations.Singleton;
 @RequiredArgsConstructor
 public class EagerBean1 {
   private final Integer dep;
-  private final scannablePackage.EagerBean2 dep2;
+  private final EagerBean2 dep2;
 }
