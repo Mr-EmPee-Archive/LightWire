@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "mr.empee"
-version = System.getenv("GITHUB_REF_NAME") ?: "develop"
+version = "develop"
 
 repositories {
     mavenCentral()
@@ -23,27 +23,4 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-
-            var repo = System.getenv("GITHUB_REPOSITORY")
-            url = uri("https://maven.pkg.github.com/${repo}")
-
-            credentials {
-                username = System.getenv("USERNAME")
-                password = System.getenv("TOKEN")
-            }
-        }
-    }
-    
-    publications {
-        register<MavenPublication>("gpr") {
-            from(components["java"])
-            artifactId = "lightwire"
-        }
-    }
 }
