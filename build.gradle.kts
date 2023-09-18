@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "mr.empee"
-version = System.getenv("CI_COMMIT_TAG") ?: "develop"
+version = System.getenv("GITHUB_REF_NAME") ?: "develop"
 
 repositories {
     mavenCentral()
@@ -26,24 +26,22 @@ tasks.test {
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("library") {
-            from(components["java"])
-        }
-    }
-
     repositories {
         maven {
-            var projectId = System.getenv("CI_PROJECT_ID")
-            url = uri("https://gitlab.com/api/v4/projects/$projectId/packages/maven")
-            credentials(HttpHeaderCredentials::class) {
-                name = "Job-Token"
-                value = System.getenv("CI_JOB_TOKEN")
-            }
+            name = "GitHubPackages"
 
-            authentication {
-                create("header", HttpHeaderAuthentication::class)
+            var repo = System.getenv("GITHUB_REPOSITORY")
+            url = uri("https://maven.pkg.github.com/${repo}")
+
+            credentials {
+                username = System.getenv("USERNAME")
+                password = System.getenv("TOKEN")
             }
+        }
+    }
+    publications {
+        register<MavenPublication>("gpr") {
+            from(components["java"])
         }
     }
 }
