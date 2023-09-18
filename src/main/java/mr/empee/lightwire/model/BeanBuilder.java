@@ -2,17 +2,22 @@ package mr.empee.lightwire.model;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
+import lombok.Value;
 import mr.empee.lightwire.annotations.Factory;
 import mr.empee.lightwire.annotations.Instance;
 import mr.empee.lightwire.annotations.Provider;
 import mr.empee.lightwire.annotations.Singleton;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * Builds a bean instance from a class
@@ -38,9 +43,9 @@ public class BeanBuilder<T> {
   }
 
   private static Method findBeanConstructionMethod(Class<?> clazz) {
-    var methods = Arrays.stream(clazz.getDeclaredMethods())
+    List<Method> methods = Arrays.stream(clazz.getDeclaredMethods())
         .filter(m -> m.isAnnotationPresent(Provider.class))
-        .toList();
+        .collect(Collectors.toList());
 
     if (methods.isEmpty()) {
       throw new IllegalStateException("Unable to find a provider for the bean " + clazz.getName());
@@ -50,7 +55,7 @@ public class BeanBuilder<T> {
       throw new IllegalStateException("Multiple providers found for the bean " + clazz.getName());
     }
 
-    var method = methods.get(0);
+    Method method = methods.get(0);
     if (!Modifier.isStatic(method.getModifiers())) {
       throw new IllegalStateException("The provider of the bean " + clazz.getName() + " isn't static");
     }
@@ -63,14 +68,14 @@ public class BeanBuilder<T> {
   }
 
   private static Constructor<?> findBeanConstructor(Class<?> clazz) {
-    var constructors = clazz.getDeclaredConstructors();
+    Constructor<?>[] constructors = clazz.getDeclaredConstructors();
     if (constructors.length == 1) {
       return constructors[0];
     }
 
-    var injectableConstructors = Arrays.stream(constructors)
+    List<Constructor<?>> injectableConstructors = Arrays.stream(constructors)
         .filter(c -> c.isAnnotationPresent(Provider.class))
-        .toList();
+        .collect(Collectors.toList());
 
     if (injectableConstructors.size() > 1) {
       throw new IllegalStateException("Multiple method constructors found for the bean " + clazz.getName());
@@ -81,12 +86,12 @@ public class BeanBuilder<T> {
 
   @SneakyThrows
   private static void injectInstanceFields(Object target) {
-    var fields = Arrays.stream(target.getClass().getDeclaredFields())
+    List<Field> fields = Arrays.stream(target.getClass().getDeclaredFields())
         .filter(f -> f.isAnnotationPresent(Instance.class))
         .filter(f -> Modifier.isStatic(f.getModifiers()))
-        .toList();
+        .collect(Collectors.toList());
 
-    for (var field : fields) {
+    for (Field field : fields) {
       field.setAccessible(true);
       field.set(null, target);
     }
@@ -116,7 +121,11 @@ public class BeanBuilder<T> {
     return constructor.build(args);
   }
 
-  private record BeanConstructor(Method method, Constructor<?> constructor) {
+  @Value
+  private static class BeanConstructor {
+    Method method;
+    Constructor<?> constructor;
+
     public Parameter[] getDependencies() {
       if (method != null) {
         return method.getParameters();
@@ -133,7 +142,7 @@ public class BeanBuilder<T> {
       }
 
       constructor.setAccessible(true);
-      var instance = constructor.newInstance(args);
+      Object instance = constructor.newInstance(args);
       injectInstanceFields(instance);
       return new BeanProvider(instance.getClass()) {
         @Override

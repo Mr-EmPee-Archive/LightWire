@@ -1,5 +1,10 @@
 package mr.empee.lightwire;
 
+import java.util.Collections;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import lombok.RequiredArgsConstructor;
 import mr.empee.lightwire.annotations.Singleton;
 import mr.empee.lightwire.exceptions.LightwireException;
@@ -9,19 +14,14 @@ import mr.empee.lightwire.model.BeanProvider;
 import scannable.EagerBean1;
 import scannable.EagerBean2;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
 @DisplayName("Load default beans")
 class BeanLoaderTest extends AbstractTest {
 
   @Test
   @DisplayName("Report circular dependencies")
   void throwsOnCircularDep() {
-    var context = new BeanContext();
-    var loader = new BeanLoader(context, List.of(CircularDepBean.class));
+    BeanContext context = new BeanContext();
+    BeanLoader loader = new BeanLoader(context, Collections.singletonList(CircularDepBean.class));
 
     assertThrows(LightwireException.class, loader::load);
   }
@@ -29,10 +29,10 @@ class BeanLoaderTest extends AbstractTest {
   @Test
   @DisplayName("Scan the package and loads eager beans")
   void loadBeansFromScan() {
-    var targetPackage = EagerBean1.class.getPackage();
+    Package targetPackage = EagerBean1.class.getPackage();
 
     BeanContext context = new BeanContext();
-    context.addProvider(new BeanProvider<>(Integer.class) {
+    context.addProvider(new BeanProvider(Integer.class) {
       @Override
       protected Integer build() {
         return 10;

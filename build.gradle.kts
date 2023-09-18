@@ -11,6 +11,11 @@ repositories {
     mavenCentral()
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 dependencies {
     implementation("io.github.classgraph:classgraph:4.8.162")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")

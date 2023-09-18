@@ -1,10 +1,11 @@
 package mr.empee.lightwire;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import mr.empee.lightwire.model.BeanContext;
 import mr.empee.lightwire.model.BeanLoader;
 import mr.empee.lightwire.model.BeanProvider;
-
-import java.util.List;
 
 /**
  * Main class of the library
@@ -15,7 +16,7 @@ public class Lightwire {
   private final BeanContext beanContext = new BeanContext();
 
   public static Lightwire create(Package scanPackage) {
-    var instance = new Lightwire();
+    Lightwire instance = new Lightwire();
     instance.loadBeans(scanPackage);
     return instance;
   }
@@ -36,7 +37,7 @@ public class Lightwire {
   public <T> List<T> getAllBeans(Class<T> clazz) {
     return beanContext.getAllProviders(clazz).stream()
         .map(BeanProvider::get)
-        .toList();
+        .collect(Collectors.toList());
   }
 
   public <T> void addBean(T bean) {

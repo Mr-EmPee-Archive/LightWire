@@ -4,7 +4,9 @@ import mr.empee.lightwire.exceptions.LightwireException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * BeanContext is a container for all beans in the application.
@@ -18,26 +20,26 @@ public class BeanContext {
     return providers.stream()
         .filter(provider -> clazz.isAssignableFrom(provider.getType()))
         .map(provider -> (BeanProvider<T>) provider)
-        .toList();
+        .collect(Collectors.toList());
   }
 
   public <T> BeanProvider<T> getProvider(Class<T> clazz) {
-    var providers = findAllProviders(clazz);
+    List<BeanProvider<T>> providers = findAllProviders(clazz);
     if (providers.size() == 1) {
       return providers.get(0);
     } else if (providers.size() > 1) {
       throw new LightwireException("Multiple beans found for type " + clazz.getName());
     }
 
-    var provider = buildProvider(clazz);
+    BeanProvider<T> provider = buildProvider(clazz);
     addProvider(provider);
     return provider;
   }
 
   public <T> List<BeanProvider<T>> getAllProviders(Class<T> clazz) {
-    var providers = findAllProviders(clazz);
+    List<BeanProvider<T>> providers = findAllProviders(clazz);
     if (providers.isEmpty()) {
-      providers = List.of(buildProvider(clazz));
+      providers = Collections.singletonList(buildProvider(clazz));
       addProvider(providers.get(0));
     }
 
