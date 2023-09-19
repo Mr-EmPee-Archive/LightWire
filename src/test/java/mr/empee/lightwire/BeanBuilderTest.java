@@ -37,7 +37,7 @@ class BeanBuilderTest extends AbstractTest {
   @Test
   @DisplayName("Inject singleton instance")
   void injectSingletonInstance() throws InvocationTargetException {
-    BeanProvider<?> provider = new BeanBuilder<>(InjectSingletonBean.class).build(new BeanContext());
+    var provider = new BeanBuilder<>(InjectSingletonBean.class).build(new BeanContext());
     provider.get();
 
     assertNotNull(InjectSingletonBean.instance);
@@ -58,7 +58,7 @@ class BeanBuilderTest extends AbstractTest {
   public static class MethodDepsBean {
     @Provider
     public static BeanProvider<ConstructorDepsBean> buildInstance(NoDepsBean noDepsBean) {
-      return new BeanProvider(ConstructorDepsBean.class) {
+      return new BeanProvider<>(ConstructorDepsBean.class) {
         @Override
         public ConstructorDepsBean build() {
           return new ConstructorDepsBean(noDepsBean, noDepsBean);

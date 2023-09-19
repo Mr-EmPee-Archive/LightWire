@@ -4,7 +4,6 @@ import mr.empee.lightwire.exceptions.LightwireException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,22 +23,22 @@ public class BeanContext {
   }
 
   public <T> BeanProvider<T> getProvider(Class<T> clazz) {
-    List<BeanProvider<T>> providers = findAllProviders(clazz);
+    var providers = findAllProviders(clazz);
     if (providers.size() == 1) {
       return providers.get(0);
     } else if (providers.size() > 1) {
       throw new LightwireException("Multiple beans found for type " + clazz.getName());
     }
 
-    BeanProvider<T> provider = buildProvider(clazz);
+    var provider = buildProvider(clazz);
     addProvider(provider);
     return provider;
   }
 
   public <T> List<BeanProvider<T>> getAllProviders(Class<T> clazz) {
-    List<BeanProvider<T>> providers = findAllProviders(clazz);
+    var providers = findAllProviders(clazz);
     if (providers.isEmpty()) {
-      providers = Collections.singletonList(buildProvider(clazz));
+      providers = List.of(buildProvider(clazz));
       addProvider(providers.get(0));
     }
 

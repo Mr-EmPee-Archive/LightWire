@@ -12,8 +12,8 @@ class BeanContextTest extends AbstractTest {
   @Test
   @DisplayName("Get a specific provider from the context")
   void getProvider() {
-    BeanContext context = new BeanContext();
-    context.addProvider(new BeanProvider(Integer.class) {
+    var context = new BeanContext();
+    context.addProvider(new BeanProvider<>(Integer.class) {
       @Override
       protected Integer build() {
         return 1000;
@@ -27,8 +27,8 @@ class BeanContextTest extends AbstractTest {
   @Test
   @DisplayName("Get a provider using a parent class")
   void getProviderUsingParentClass() {
-    BeanContext context = new BeanContext();
-    context.addProvider(new BeanProvider(Integer.class) {
+    var context = new BeanContext();
+    context.addProvider(new BeanProvider<>(Integer.class) {
       @Override
       protected Integer build() {
         return 1000;
@@ -42,15 +42,15 @@ class BeanContextTest extends AbstractTest {
   @Test
   @DisplayName("Get multiple providers using the same class")
   void getMultipleProviders() {
-    BeanContext context = new BeanContext();
-    context.addProvider(new BeanProvider(Integer.class) {
+    var context = new BeanContext();
+    context.addProvider(new BeanProvider<>(Integer.class) {
       @Override
       protected Integer build() {
         return 1000;
       }
     });
 
-    context.addProvider(new BeanProvider(Integer.class) {
+    context.addProvider(new BeanProvider<>(Integer.class) {
       @Override
       protected Integer build() {
         return 1000;

@@ -9,13 +9,11 @@ import mr.empee.lightwire.annotations.Provider;
 import mr.empee.lightwire.annotations.Singleton;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -43,7 +41,7 @@ public class BeanBuilder<T> {
   }
 
   private static Method findBeanConstructionMethod(Class<?> clazz) {
-    List<Method> methods = Arrays.stream(clazz.getDeclaredMethods())
+    var methods = Arrays.stream(clazz.getDeclaredMethods())
         .filter(m -> m.isAnnotationPresent(Provider.class))
         .collect(Collectors.toList());
 
@@ -55,7 +53,7 @@ public class BeanBuilder<T> {
       throw new IllegalStateException("Multiple providers found for the bean " + clazz.getName());
     }
 
-    Method method = methods.get(0);
+    var method = methods.get(0);
     if (!Modifier.isStatic(method.getModifiers())) {
       throw new IllegalStateException("The provider of the bean " + clazz.getName() + " isn't static");
     }
@@ -68,12 +66,12 @@ public class BeanBuilder<T> {
   }
 
   private static Constructor<?> findBeanConstructor(Class<?> clazz) {
-    Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+    var constructors = clazz.getDeclaredConstructors();
     if (constructors.length == 1) {
       return constructors[0];
     }
 
-    List<Constructor<?>> injectableConstructors = Arrays.stream(constructors)
+    var injectableConstructors = Arrays.stream(constructors)
         .filter(c -> c.isAnnotationPresent(Provider.class))
         .collect(Collectors.toList());
 
@@ -86,12 +84,12 @@ public class BeanBuilder<T> {
 
   @SneakyThrows
   private static void injectInstanceFields(Object target) {
-    List<Field> fields = Arrays.stream(target.getClass().getDeclaredFields())
+    var fields = Arrays.stream(target.getClass().getDeclaredFields())
         .filter(f -> f.isAnnotationPresent(Instance.class))
         .filter(f -> Modifier.isStatic(f.getModifiers()))
         .collect(Collectors.toList());
 
-    for (Field field : fields) {
+    for (var field : fields) {
       field.setAccessible(true);
       field.set(null, target);
     }
@@ -123,6 +121,7 @@ public class BeanBuilder<T> {
 
   @Value
   private static class BeanConstructor {
+
     Method method;
     Constructor<?> constructor;
 
@@ -142,7 +141,7 @@ public class BeanBuilder<T> {
       }
 
       constructor.setAccessible(true);
-      Object instance = constructor.newInstance(args);
+      var instance = constructor.newInstance(args);
       injectInstanceFields(instance);
       return new BeanProvider(instance.getClass()) {
         @Override
@@ -151,6 +150,7 @@ public class BeanBuilder<T> {
         }
       };
     }
+
   }
 
 }
