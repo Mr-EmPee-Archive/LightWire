@@ -1,5 +1,6 @@
 plugins {
     id("org.gradle.java-library")
+    id("org.gradle.maven-publish")
     id("io.freefair.lombok") version "6.6.3"
 }
 
