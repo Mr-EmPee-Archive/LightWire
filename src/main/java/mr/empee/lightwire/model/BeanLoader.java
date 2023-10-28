@@ -90,7 +90,7 @@ public class BeanLoader {
     checkForCircularDependency();
 
     var sortedBeans = beans.values().stream()
-        .sorted((b1, b2) -> getBeanPriority(b1).compareTo(getBeanPriority(b2)))
+        .sorted((b1, b2) -> getBeanPriority(b2).compareTo(getBeanPriority(b1)))
         .collect(Collectors.toList());
 
     for (BeanBuilder<?> builder : sortedBeans) {
