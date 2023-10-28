@@ -1,7 +1,6 @@
 plugins {
-    id("io.freefair.lombok") version "8.3"
-    id("maven-publish")
-    id("java")
+    id("org.gradle.java-library")
+    id("io.freefair.lombok") version "6.6.3"
 }
 
 group = "mr.empee"
@@ -16,11 +15,20 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
+tasks {
+    test {
+        useJUnitPlatform()
+    }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    java {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+
+        withSourcesJar()
+        withJavadocJar()
+
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
+    }
 }
