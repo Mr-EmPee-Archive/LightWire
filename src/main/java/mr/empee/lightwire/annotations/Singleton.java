@@ -26,4 +26,13 @@ public @interface Singleton {
    */
   boolean lazy() default false;
 
+  /*
+   * The priority of the bean. The higher the priority the earlier it will be loaded
+   */
+  Priority priority() default Priority.MEDIUM;
+
+  enum Priority {
+    LOW, MEDIUM, HIGH
+  }
+
 }

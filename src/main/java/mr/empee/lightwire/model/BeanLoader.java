@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * BeanLoader is responsible for loading beans
@@ -87,7 +88,12 @@ public class BeanLoader {
    */
   public void load() {
     checkForCircularDependency();
-    for (BeanBuilder<?> builder : beans.values()) {
+
+    var sortedBeans = beans.values().stream()
+        .sorted((b1, b2) -> getBeanPriority(b1).compareTo(getBeanPriority(b2)))
+        .collect(Collectors.toList());
+
+    for (BeanBuilder<?> builder : sortedBeans) {
       try {
         if (context.isLoaded(builder.getBeanClass())) {
           continue;
@@ -98,5 +104,14 @@ public class BeanLoader {
         throw new LightwireException("Failed to build bean " + builder.getBeanClass().getName(), e.getCause());
       }
     }
+  }
+
+  private Integer getBeanPriority(BeanBuilder<?> bean) {
+    var annotation = bean.getBeanClass().getAnnotation(Singleton.class);
+    if (annotation == null) {
+      return 0;
+    }
+
+    return annotation.priority().ordinal();
   }
 }
