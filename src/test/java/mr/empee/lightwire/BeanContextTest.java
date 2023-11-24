@@ -58,7 +58,7 @@ class BeanContextTest extends AbstractTest {
     });
 
     assertThrows(LightwireException.class, () -> context.getProvider(Number.class));
-    assertEquals(2, context.getAllProviders(Number.class).size());
+    assertEquals(2, context.findAllProviders(Number.class).size());
   }
 
 }

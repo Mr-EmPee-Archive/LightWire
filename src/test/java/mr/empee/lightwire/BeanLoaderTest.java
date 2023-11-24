@@ -55,7 +55,7 @@ class BeanLoaderTest extends AbstractTest {
 
     loader.load();
 
-    var providers = context.getAllProviders(Object.class);
+    var providers = context.findAllProviders(Object.class);
     assertEquals(2, providers.size());
 
     assertEquals(BeanWithHighPriority.class, BeanWithLowPriority.loadOrder.get(0));

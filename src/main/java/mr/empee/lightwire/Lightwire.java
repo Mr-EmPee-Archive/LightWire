@@ -35,7 +35,7 @@ public class Lightwire {
   }
 
   public <T> List<T> getAllBeans(Class<T> clazz) {
-    return beanContext.getAllProviders(clazz).stream()
+    return beanContext.findAllProviders(clazz).stream()
         .map(BeanProvider::get)
         .collect(Collectors.toList());
   }

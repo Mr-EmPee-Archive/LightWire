@@ -95,7 +95,7 @@ public class BeanBuilder<T> {
     }
   }
 
-  private static boolean isBean(Class<?> clazz) {
+  public static boolean isBean(Class<?> clazz) {
     return (clazz.isAnnotationPresent(Singleton.class) || clazz.isAnnotationPresent(Factory.class))
         && !clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers());
   }

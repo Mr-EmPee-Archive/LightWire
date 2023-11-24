@@ -15,7 +15,7 @@ public class BeanContext {
 
   private final List<BeanProvider<?>> providers = new ArrayList<>();
 
-  private  <T> List<BeanProvider<T>> findAllProviders(Class<T> clazz) {
+  public <T> List<BeanProvider<T>> findAllProviders(Class<T> clazz) {
     return providers.stream()
         .filter(provider -> clazz.isAssignableFrom(provider.getType()))
         .map(provider -> (BeanProvider<T>) provider)
@@ -33,16 +33,6 @@ public class BeanContext {
     var provider = buildProvider(clazz);
     addProvider(provider);
     return provider;
-  }
-
-  public <T> List<BeanProvider<T>> getAllProviders(Class<T> clazz) {
-    var providers = findAllProviders(clazz);
-    if (providers.isEmpty()) {
-      providers = List.of(buildProvider(clazz));
-      addProvider(providers.get(0));
-    }
-
-    return providers;
   }
 
   public void addProvider(BeanProvider<?> bean) {
